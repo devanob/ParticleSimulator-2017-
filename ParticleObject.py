@@ -14,7 +14,7 @@ class Particle:
         self.width = containerWidth
         self.height = containerHeight
         self.degreeOfFreedom = (math.pi / 180) * 5
-        self.mass = 0.56 * size;
+        self.mass = 0.34 * size;
     def containerReflection(self):
         if self.x > self.width - self.size:
             self.x = 2 * (self.width - self.size) - self.x
@@ -32,7 +32,7 @@ class Particle:
         pass
     def nextFrame(self):
         self.x += (math.sin(self.angle) * self.speed)
-        self.y -= (math.cos(self.angle) * self.speed)
+        self.y += (math.cos(self.angle) * self.speed)
         ##bounce of container 
         self.containerReflection()
     def draw(self):

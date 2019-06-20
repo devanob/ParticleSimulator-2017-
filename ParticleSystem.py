@@ -14,10 +14,13 @@ class ParticleSystem:
         #number of paricles 
         self.particleCount = particleCount
         #empty particle set 
-        self.probabSplit = 5
+        self.probabMerge = 0
+        self.increment = 5
         self.particlesSet = []
         self.ToBeRemoved =[]
         self.ToBeAdded =[]
+        self.stateChange = True
+        self.color = (255,255,255)
         for particle in range(self.particleCount):
             size = random.randint(5, 15)
             coords = (random.randint(size, self.window_width ),random.randint(size, self.window_height))
@@ -25,28 +28,14 @@ class ParticleSystem:
             if particle == 5 :
                 self.particlesSet.append(Particle(self.screen,size,*coords,*(255,0,0),self.window_width, self.window_height))
             else:
-                self.particlesSet.append(Particle(self.screen,size,*coords,*color,self.window_width, self.window_height))
-                
-                
-            
+                self.particlesSet.append(Particle(self.screen,size,*coords,*self.color,self.window_width, self.window_height))
+                      
     def nextFrame(self):
         for i in range(self.particleCount):
             self.particlesSet[i].nextFrame()
             for particle in self.particlesSet[i+1:]:
                 self.collisionDetection(self.particlesSet[i], particle)
-        if len(self.ToBeRemoved) > 0:
-             for particle in self.ToBeRemoved:
-                 try:
-                    self.particlesSet.remove(particle)
-                    self.particleCount = self.particleCount -1
-                 except:
-                     pass
-             self.ToBeRemoved = []
-        if len(self.ToBeAdded) > 0:
-            for particle in self.ToBeAdded:
-                self.particlesSet.append(particle)
-                self.particleCount = self.particleCount + 1
-            self.ToBeAdded = []
+        
 
         
     def draw(self):
@@ -86,15 +75,6 @@ class ParticleSystem:
 
     def calculateMomentuem(self, particle1, particle2, deltaX, deltaY):
          angle = math.atan2(deltaY, deltaX) +  math.pi / 2.0
-        #  #Particle 1-After Collision
-        #  particleOne = vectorAddition(particle1.angle, particle1.speed*(particle1.mass-particle2.mass)/(particle1.mass + particle2.mass),\
-        #      angle, 2.0*particle2.speed*particle2.mass/(particle1.mass + particle2.mass))
-        #  particleTwo = vectorAddition(particle2.angle, particle2.speed*(particle2.mass-particle1.mass)/(particle1.mass + particle2.mass), \
-        #      angle + math.pi, 2.0*particle1.speed*particle1.mass/(particle1.mass + particle2.mass))
-
-        #  (particle1.angle, particle1.speed) = particleOne
-        #  (particle2.angle, particle2.speed) = particleTwo
-        
          self.calculateInelasticMomentuem(particle1, particle2)
          overlap = (particle1.size + particle2.size - math.hypot(deltaX, deltaY)) / 2.0 
          particle1.x += math.sin(angle) * overlap
@@ -111,7 +91,7 @@ class ParticleSystem:
         delta = math.hypot(deltaX, deltaY)
         if delta < particle1.size + particle2.size:
              angle = math.atan2(deltaX, deltaY) +   math.pi/ 2.0
-             if random.uniform(0.0, 100) < self.probabSplit:
+             if random.uniform(0.0, 100) < self.probabMerge:
                  self.calculateElasticMomentuem(particle1, particle2,deltaX, deltaY)
              else:
                  self.calculateMomentuem(particle1,particle2, deltaX, deltaY)
@@ -119,4 +99,32 @@ class ParticleSystem:
             # particle1.colour = (255,255,255)
             # particle2.colour = (255,255,255)
             False
+    def addParticle(self, x, y):
+        size = random.randint(5, 15)
+        self.particlesSet.append(Particle(self.screen,size,x,y,*self.color,self.window_width, self.window_height))
+        self.particleCount+=1
+        self.stateChange = True
+    # True = increase # False= Decrease Probabilty Of Elastic Collsion
+    def increaseElasticCollision(self,flagIncreaseDecrease):
+        if (flagIncreaseDecrease == True):
+            self.probabMerge+=self.increment
+            if self.probabMerge > 100:
+                self.probabMerge = 100
+            else:
+                self.stateChange = True
+        else:
+            self.probabMerge-=self.increment
+            if self.probabMerge < 0 :
+                self.probabMerge = 0
+            else:
+                self.stateChange = True
+
+    def increaseKineticEnergy(self):
+        for particle in self.particlesSet:
+            particle.speed = random.uniform(2.5, 10)
+        
+
+
+
+    
 
