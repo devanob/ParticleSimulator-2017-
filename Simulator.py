@@ -20,9 +20,13 @@ class Simulator:
         self.timeStep=False
     #sets the simulator and intiate certain apsect of the simulator
     def setInstructions(self):
-        self.status.textDict["Ince/Decr Inelastic Collision"] = "<--Z/z . x/X-->"
+        self.status.textDict["Game State"] = "Running"
+        self.status.textDict["Ince/Decr Inelastic Collision"] = "<-(-)-Z/z . x/X-(+)->"
         self.status.textDict["Pause Simulation"] = "P/p"
         self.status.textDict["ForwardStep Simulation"] = "(Right Arrow Key)-->"
+        self.status.textDict["Increase Particle Speed"] = "S/s"
+        self.status.textDict["Hide/Show Menu"] = "H/h"
+        self.status.textDict["Add Paricles"] = "Left Mouse Click"
 
     def setUp(self):
         pygame.init()
@@ -33,7 +37,6 @@ class Simulator:
         self.partSystem = ParticleSystem(self.screen,self.width,self.height,10)
         self.status = SimulatorUIstate(self.screen,pygame.font.get_default_font(),16,(255,0,0),0,0)
         #sets the simulator to Running
-        self.status.textDict["Game State"] = "Running"
         self.setInstructions()
     # event loop for the simulator 
     #register and execute logic based on user events
@@ -71,29 +74,41 @@ class Simulator:
         self.status.textDict["Particle Count"] = self.partSystem.particleCount
         self.status.textDict["Probability Elastic Collsion"] = self.partSystem.probabMerge
         self.partSystem.stateChange = False
+    #handles the events from ther user 
     def eventHandlier(self,event):
+         # exit window on close 
           if event.type == pygame.QUIT:
                     self.running = False
           if event.type ==pygame.MOUSEBUTTONUP:
+              #add particles at position x, y 
               self.partSystem.addParticle(*event.pos)
           if event.type == pygame.KEYDOWN:
               if (event.key ==pygame.K_p):
+                  #toggles simulation pause 
                   self.paused = not self.paused
                   if self.paused:
                       self.status.textDict["Game State"] = "Paused"
                   else:
                       self.status.textDict["Game State"] = "Running"
               elif (event.key ==pygame.K_x):
+                  #increase of inelastic collsion sticky probability 
                   self.partSystem.increaseElasticCollision(True)
               elif (event.key ==pygame.K_z):
+                  #increase of inelastic collsion sticky probability 
                   self.partSystem.increaseElasticCollision(False)
               elif (event.key ==pygame.K_s):
+                  #increase speed of all particles
                   self.partSystem.increaseKineticEnergy()
               elif(event.key == pygame.K_RIGHT):
+                  #allow user to control forwaard time step when the simulation is paused
                   self.timeStep = True;
           if event.type == pygame.KEYUP:
+
               if event.key == pygame.K_RIGHT:
                   self.timeStep = False
+            #allow user to toggle visibilty of menue
+              if event.key == pygame.K_h:
+                  self.status.toggle()
 
           
 
@@ -101,10 +116,12 @@ class Simulator:
         
 
 
-
+"""
+Entry Point For The Program 
+"""
 import sys
 if __name__ == "__main__":
-    print(sys.argv)
+    #defaults to 500 for Height and Width 
     WindowHeight = 500
     WindowWidth = 500
     try:

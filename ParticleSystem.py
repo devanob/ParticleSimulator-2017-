@@ -4,9 +4,11 @@ import math
 import random
 import numpy as np
 
-
+"""[summary]
+Particle System Handler For Particle Object 
+"""
 class ParticleSystem:
-
+    #constructor 
     def __init__(self,screen,window_width,window_height, particleCount):
         self.window_height = window_height;
         self.window_width = window_width;
@@ -24,8 +26,8 @@ class ParticleSystem:
         for particle in range(self.particleCount):
             size = random.randint(5, 15)
             coords = (random.randint(size, self.window_width ),random.randint(size, self.window_height))
-            color = (255,255,255)
-            if particle == 5 :
+            color = (255,255,255)#white 
+            if particle == 5 :# make red refernce particle 
                 self.particlesSet.append(Particle(self.screen,size,*coords,*(255,0,0),self.window_width, self.window_height))
             else:
                 self.particlesSet.append(Particle(self.screen,size,*coords,*self.color,self.window_width, self.window_height))
@@ -37,10 +39,11 @@ class ParticleSystem:
                 self.collisionDetection(self.particlesSet[i], particle)
         
 
-        
+    #draws next frame 
     def draw(self):
         for particle in self.particlesSet:
             particle.draw()
+    #calculate inElastic Collision 
     def calculateInelasticMomentuem(self,particle1, particle2):
         #Calculate The Velocity Componet Of Each Vector
         part1IntialVel = particle1.speed*np.array([math.cos(particle1.angle), math.sin(particle1.angle)])
@@ -52,7 +55,7 @@ class ParticleSystem:
 
         (particle1.angle, particle1.speed )= (math.pi / 2.0 - math.atan2(part1FinalVel[0], part1FinalVel[1]),math.hypot(part1FinalVel[0], part1FinalVel[1]))
         (particle2.angle, particle2.speed )= (math.pi / 2.0 - math.atan2(part2FinalVel[0], part2FinalVel[1]),math.hypot(part2FinalVel[0], part2FinalVel[1]))
-    
+    #calculates elastic Collsion
     def calculateElasticMomentuem(self,particle1, particle2,deltaX, deltaY):
         part1IntialVel = particle1.speed*np.array([math.cos(particle1.angle), math.sin(particle1.angle)])
         part2IntialVel  = particle2.speed*np.array([math.cos(particle2.angle), math.sin(particle2.angle)])
@@ -62,29 +65,27 @@ class ParticleSystem:
         (particle2.angle, particle2.speed )= (    math.pi / 2.0 - math.atan2(pFinal[0], pFinal[1]),math.hypot(pFinal[0], pFinal[1]) )
         overlap = (particle1.size + particle2.size - math.hypot(deltaX, deltaY)) / 2.0 
         angle = math.atan2(deltaY, deltaX) +  math.pi / 2.0
+        #remove overlap if particles overlap
+        #allow particle to go in opposite diection of collion until overlap has been removed
         particle1.x += math.sin(angle) * overlap
         particle2.y -= math.cos(angle) * overlap
         particle2.x -= math.sin(angle) * overlap
         particle2.y += math.cos(angle) * overlap
         
         
-
-        
-
-
-
+    #calculate momemtum assuming elastic collsion and kinetic energy is conserved 
     def calculateMomentuem(self, particle1, particle2, deltaX, deltaY):
          angle = math.atan2(deltaY, deltaX) +  math.pi / 2.0
          self.calculateInelasticMomentuem(particle1, particle2)
-         overlap = (particle1.size + particle2.size - math.hypot(deltaX, deltaY)) / 2.0 
-         particle1.x += math.sin(angle) * overlap
-         particle2.y -= math.cos(angle) * overlap
-         particle2.x -= math.sin(angle) * overlap
-         particle2.y += math.cos(angle) * overlap
+         overlapDistance = (particle1.size + particle2.size - math.hypot(deltaX, deltaY))
+         particle1.x += math.sin(angle) * overlapDistance
+         particle2.y -= math.cos(angle) * overlapDistance
+         particle2.x -= math.sin(angle) * overlapDistance
+         particle2.y += math.cos(angle) * overlapDistance
         
 
         
-
+    #collsion detection 
     def collisionDetection(self, particle1, particle2):
         deltaX = particle1.x - particle2.x
         deltaY = particle1.y - particle2.y
@@ -99,6 +100,7 @@ class ParticleSystem:
             # particle1.colour = (255,255,255)
             # particle2.colour = (255,255,255)
             False
+    #add particle at position x y 
     def addParticle(self, x, y):
         size = random.randint(5, 15)
         self.particlesSet.append(Particle(self.screen,size,x,y,*self.color,self.window_width, self.window_height))
@@ -118,10 +120,11 @@ class ParticleSystem:
                 self.probabMerge = 0
             else:
                 self.stateChange = True
+    #increae kinectic energy of each pparticle randomly 
 
     def increaseKineticEnergy(self):
         for particle in self.particlesSet:
-            particle.speed = random.uniform(2.5, 10)
+            particle.speed += random.uniform(2.5, 10)
         
 
 
